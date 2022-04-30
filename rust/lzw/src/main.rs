@@ -1,7 +1,8 @@
+mod dictionary;
 mod io;
-use crate::io::LZWWriter;
 
-use std::collections::HashMap;
+use crate::dictionary::Dictionary;
+use crate::io::LZWWriter;
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
@@ -45,34 +46,4 @@ fn compress(input: BufReader<File>, output: BufWriter<File>) {
     }
 
     buf.flush();
-}
-
-struct Dictionary {
-    map: HashMap<Vec<u8>, u32>,
-    next_code: u32,
-}
-
-impl Dictionary {
-    fn new() -> Dictionary {
-        let mut dictionary = Dictionary {
-            map: HashMap::new(),
-            next_code: 0,
-        };
-        for i in 0..=255 {
-            dictionary.add(vec![i]);
-        }
-        dictionary
-    }
-    fn add(&mut self, entry: Vec<u8>) {
-        self.map.insert(entry, self.next_code);
-        self.next_code += 1;
-    }
-
-    fn contains(&self, entry: &[u8]) -> bool {
-        self.map.contains_key(entry)
-    }
-
-    fn get_code(&self, entry: &[u8]) -> &u32 {
-        self.map.get(entry).expect("Entry not found in dictionary")
-    }
 }
