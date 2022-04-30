@@ -1,3 +1,6 @@
+mod io;
+use crate::io::LZWWriter;
+
 use std::collections::HashMap;
 use std::env;
 use std::fs::File;
@@ -19,7 +22,7 @@ fn main() {
 
 fn compress(input: BufReader<File>, output: BufWriter<File>) {
     let mut dictionary = Dictionary::new();
-    let mut buf = OutputBuffer::new(output);
+    let mut buf = LZWWriter::new(output);
 
     let mut string: Vec<u8> = vec![];
 
@@ -29,7 +32,7 @@ fn compress(input: BufReader<File>, output: BufWriter<File>) {
 
         if !dictionary.contains(&string) {
             let code = dictionary.get_code(&string[0..string.len() - 1]);
-            buf.write(code);
+            buf.write_code(code);
 
             dictionary.add(string);
             string = vec![byte];
@@ -38,49 +41,10 @@ fn compress(input: BufReader<File>, output: BufWriter<File>) {
 
     if string.len() > 0 {
         let code = dictionary.get_code(&string);
-        buf.write(code);
+        buf.write_code(code);
     }
 
     buf.flush();
-}
-
-struct OutputBuffer {
-    writer: BufWriter<File>,
-    buf: [u8; 3],
-    is_first_code: bool,
-}
-
-impl OutputBuffer {
-    fn new(writer: BufWriter<File>) -> OutputBuffer {
-        OutputBuffer {
-            writer,
-            buf: [0; 3],
-            is_first_code: true,
-        }
-    }
-
-    fn write(&mut self, code: &u32) {
-        if self.is_first_code {
-            self.buf[0] = ((code & 0x0FF0) >> 4) as u8;
-            self.buf[1] = ((code & 0x000F) << 4) as u8;
-            self.is_first_code = false;
-        } else {
-            self.buf[1] |= ((code & 0x0F00) >> 8) as u8;
-            self.buf[2] = (code & 0x00FF) as u8;
-            self.writer
-                .write(&self.buf)
-                .expect("Failed to write to output");
-            self.is_first_code = true;
-        }
-    }
-
-    fn flush(&mut self) {
-        if !self.is_first_code {
-            self.writer
-                .write(&self.buf[0..2])
-                .expect("Failed to write to output");
-        }
-    }
 }
 
 struct Dictionary {
