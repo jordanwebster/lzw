@@ -3,30 +3,5 @@
 version = 3
 
 [[package]]
-name = "arrayvec"
-version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23b62fc65de8e4e7f52534fb52b0f3ed04746ae267519eef2a83941e8085068b"
-
-[[package]]
-name = "buffer"
-version = "0.1.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aab7228d32b5d95be40adeba1d9461c8547b5dadf5f9cbfba09b6d578991df28"
-dependencies = [
- "arrayvec",
- "mac",
-]
-
-[[package]]
 name = "lzw"
 version = "0.1.0"
-dependencies = [
- "buffer",
-]
-
-[[package]]
-name = "mac"
-version = "0.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b1db08c0d0ddbb591e65f1da58d1cefccc94a2faa0c55bf979ce215a3e04d5e"
