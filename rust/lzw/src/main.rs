@@ -1,6 +1,8 @@
+mod decompress;
 mod dictionary;
 mod io;
 
+use crate::decompress::decompress;
 use crate::dictionary::Dictionary;
 use crate::io::LZWWriter;
 use std::env;
@@ -12,13 +14,18 @@ use std::io::BufWriter;
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let f = File::open(&args[1]).expect("Failed to open input file");
+    let f = File::open(&args[2]).expect("Failed to open input file");
     let input = BufReader::new(f);
 
-    let f = File::create(&args[2]).expect("Failed to open output file");
+    let f = File::create(&args[3]).expect("Failed to open output file");
     let output = BufWriter::new(f);
 
-    compress(input, output);
+    let command = &args[1];
+    match command.as_str() {
+        "compress" => compress(input, output),
+        "decompress" => decompress(input, output),
+        cmd => println!("Unrecognised command: {}", cmd),
+    }
 }
 
 fn compress(input: BufReader<File>, output: BufWriter<File>) {
