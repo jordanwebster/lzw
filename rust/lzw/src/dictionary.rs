@@ -6,14 +6,14 @@ pub struct Dictionary {
 }
 
 impl Dictionary {
+    const DICTIONARY_SIZE: u32 = 4096;
+
     pub fn new() -> Dictionary {
         let mut dictionary = Dictionary {
             map: BiMap::new(),
             next_code: 0,
         };
-        for i in 0..=255 {
-            dictionary.add(vec![i]);
-        }
+        dictionary.init();
         dictionary
     }
     pub fn add(&mut self, entry: Vec<u8>) {
@@ -21,8 +21,24 @@ impl Dictionary {
             return
         };
 
+        if self.next_code == Dictionary::DICTIONARY_SIZE {
+            self.reset();
+        }
+
         self.map.insert(entry, self.next_code);
         self.next_code += 1;
+    }
+
+    fn reset(&mut self) {
+        self.map = BiMap::new();
+        self.next_code = 0;
+        self.init();
+    }
+
+    fn init(&mut self) {
+        for i in 0..=255 {
+            self.add(vec![i]);
+        }
     }
 
     pub fn contains(&self, entry: &[u8]) -> bool {
@@ -58,5 +74,21 @@ mod tests {
         let second_code = dictionary.get_code("hello".as_bytes());
 
         assert_eq!(first_code, second_code);
+    }
+
+    #[test]
+    fn reset_dictionary() {
+        let mut dictionary = Dictionary::new();
+        for i in 256..Dictionary::DICTIONARY_SIZE {
+            dictionary.add(format!("entry{}", i).as_bytes().to_vec());
+        }
+        assert!(dictionary.contains(&"entry256".as_bytes().to_vec()));
+        assert!(!dictionary.contains(&"hello world".as_bytes().to_vec()));
+
+        dictionary.add("hello world".as_bytes().to_vec());
+        let code = dictionary.get_code("hello world".as_bytes());
+
+        assert_eq!(code, 256);
+        assert!(!dictionary.contains(&"entry256".as_bytes().to_vec()));
     }
 }
