@@ -16,7 +16,7 @@ impl<T: std::io::Write> LZWWriter<T> {
         }
     }
 
-    pub fn write_code(&mut self, code: &u32) {
+    pub fn write_code(&mut self, code: u32) {
         if self.is_first_code {
             self.buf[0] = ((code & 0x0FF0) >> 4) as u8;
             self.buf[1] = ((code & 0x000F) << 4) as u8;
@@ -72,7 +72,7 @@ mod tests {
         let writer = BufWriter::new(output);
         let mut buf = LZWWriter::new(writer);
         for i in lower..upper {
-            buf.write_code(&i);
+            buf.write_code(i);
         }
         buf.flush();
     }

@@ -17,6 +17,10 @@ impl Dictionary {
         dictionary
     }
     pub fn add(&mut self, entry: Vec<u8>) {
+        if self.contains(&entry) {
+            return
+        };
+
         self.map.insert(entry, self.next_code);
         self.next_code += 1;
     }
@@ -25,15 +29,34 @@ impl Dictionary {
         self.map.contains_left(entry)
     }
 
-    pub fn get_code(&self, entry: &[u8]) -> &u32 {
+    pub fn get_code(&self, entry: &[u8]) -> u32 {
         self.map
             .get_by_left(entry)
             .expect("Entry not found in dictionary")
+            .clone()
     }
 
     pub fn get_entry(&self, code: u32) -> &Vec<u8> {
         self.map
             .get_by_right(&code)
             .expect("Code not found in dictionary")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::dictionary::Dictionary;
+
+    #[test]
+    fn duplicate_add() {
+        let mut dictionary = Dictionary::new();
+
+        dictionary.add("hello".as_bytes().to_vec());
+        let first_code = dictionary.get_code("hello".as_bytes());
+
+        dictionary.add("hello".as_bytes().to_vec());
+        let second_code = dictionary.get_code("hello".as_bytes());
+
+        assert_eq!(first_code, second_code);
     }
 }
